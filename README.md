@@ -31,4 +31,5 @@
 ### Look into the Id object
 ### <b>var id = new ObjectId(); id.getTimestamp();</b>
 
-
+### Install Mongoose module
+### Mongoose is an NPM package that allows you to interact with MongoDB for CURD data operations. You can install it as follows:<b>npm i --svae mongooose</b>
