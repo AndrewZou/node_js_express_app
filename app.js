@@ -1,7 +1,10 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
-var cookieParser = require('cookie-parser');
+//var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var FileStore = require('session-file-store')(session);
+
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
@@ -25,11 +28,19 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-var tempSecretKey = 'abcde-12345-efghi-45678-lmnop-78901';
-app.use(cookieParser(tempSecretKey));
-
+//var tempSecretKey = 'abcde-12345-efghi-45678-lmnop-78901';
+//app.use(cookieParser(tempSecretKey));
+app.use(session({
+  name: 'session-id',
+  secret: '12345-67890-09876-54321',
+  saveUninitialized: false,
+  resave: false,
+  store: new FileStore()
+}));
 function auth (req, res, next) {
-  if( !req.signedCookies.user ){
+  console.log( req.session );
+
+  if( !req.session.user ){
     var authHeader = req.headers.authorization;
     if (!authHeader) {
         var err = new Error('You are not authenticated!');
