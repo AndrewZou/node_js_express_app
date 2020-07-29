@@ -7,6 +7,8 @@ var FileStore = require('session-file-store')(session);
 
 var passport = require('passport');
 var authenticate = require('./authenticate');
+var config = require('./config');
+
 
 var logger = require('morgan');
 
@@ -20,7 +22,8 @@ var app = express();
 
 const mongoose = require('mongoose');
 
-const url = 'mongodb://localhost:27017/conFusion';
+//const url = 'mongodb://localhost:27017/conFusion';
+const url = config.mongoUrl;
 const dbconnection = mongoose.connect( url );
 
 // view engine setup
