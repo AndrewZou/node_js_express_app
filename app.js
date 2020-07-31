@@ -20,6 +20,15 @@ var leadeRouter = require('./routes/leaderRouter');
 
 var app = express();
 
+// Secure traffic only
+app.all('*', (req, res, next) => {
+  if (req.secure) {
+    return next();
+  }
+  else {
+    res.redirect(307, 'https://' + req.hostname + ':' + app.get('secPort') + req.url);
+  }
+});
 const mongoose = require('mongoose');
 
 //const url = 'mongodb://localhost:27017/conFusion';
@@ -37,44 +46,21 @@ app.use(express.urlencoded({ extended: false }));
 //var tempSecretKey = 'abcde-12345-efghi-45678-lmnop-78901';
 //app.use(cookieParser(tempSecretKey));
 
-app.use(session({
-  name: 'session-id',
-  secret: '12345-67890-09876-54321',
-  saveUninitialized: false,
-  resave: false,
-  store: new FileStore()
-}));
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-
-function auth (req, res, next) {
-  console.log(req.user);
-
-  if (!req.user) {
-    var err = new Error('You are not authenticated!');
-    err.status = 403;
-    next(err);
-  }
-  else {
-        next();
-  }
-}
-
-app.use(auth);
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/dishes', dishsRouter);
 app.use('/promotions', promoRouter);
 app.use('/leaders', leadeRouter);
-
 dbconnection.then( db =>{
-  console.log("Connected successfully to server.");
+  console.log("Connected successfully to MongoDB server.");
 }, err => { console.log( err );});
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
