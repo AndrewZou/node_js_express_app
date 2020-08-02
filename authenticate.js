@@ -7,6 +7,7 @@ var ExtractJwt = require('passport-jwt').ExtractJwt;
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 
 var config = require('./config.js');
+const { NotExtended } = require('http-errors');
 
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
@@ -16,7 +17,8 @@ exports.getToken = function(user) {
     return jwt.sign(user, config.secretKey,
         {expiresIn: 3600});
 };
-
+var isAdministrator = false;
+var adminUser = {};
 var opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = config.secretKey;
@@ -29,7 +31,13 @@ exports.jwtPassport = passport.use(new JwtStrategy(opts,
                 return done(err, false);
             }
             else if (user) {
-                return done(null, user);
+                console.log(">>>>Found token", user);
+                if( user.admin ){
+                    adminUser = user;
+                    console.log("Administrator Rights User");
+                    isAdministrator = true;
+                }
+                return done(null, user, isAdministrator);
             }
             else {
                 return done(null, false);
@@ -38,4 +46,30 @@ exports.jwtPassport = passport.use(new JwtStrategy(opts,
     }));
 
 exports.verifyUser = passport.authenticate('jwt', {session: false});
+/*
+passport.use( new JwtStrategy(opts, function(jwt_payload, done) {
+    User.findOne({_id: jwt_payload._id}, function(err, user) {
+        if (err) {
+            console.log(">>>>>>>", err);
+            return done(err, false);
+        }
+        if (user.admin) {
+            return done(null, user);
+        } else {
+            return done(null, false);
+            // or you could create a new account
+        }
+    });
+}));
 exports.verifyAdmin = passport.authenticate('jwt', {session: false});
+*/
+exports.verifyAdmin = function(req, err, next) {
+    //console.log( ">>>>>>>verifyAdmin", req.user );
+     if ( req.user.admin ){
+       return next();
+    } else {
+      var err = new Error('Only administrators are authorized to perform this operation.');
+      err.status = 403;
+      return next(err);
+    }
+};

@@ -9,7 +9,6 @@ var passport = require('passport');
 var authenticate = require('./authenticate');
 var config = require('./config');
 
-
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
@@ -17,6 +16,7 @@ var usersRouter = require('./routes/users');
 var dishsRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leadeRouter = require('./routes/leaderRouter');
+var uploadRouter = require('./routes/uploadRouter');
 
 var app = express();
 
@@ -57,6 +57,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/dishes', dishsRouter);
 app.use('/promotions', promoRouter);
 app.use('/leaders', leadeRouter);
+app.use('/imageUpload',uploadRouter);
+
 dbconnection.then( db =>{
   console.log("Connected successfully to MongoDB server.");
 }, err => { console.log( err );});
